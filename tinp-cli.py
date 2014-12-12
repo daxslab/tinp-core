@@ -28,11 +28,14 @@ import contrib.spia.internationalizator as internationalizator
 
 if sys.version < '3':
     _ = lambda arg: internationalizator._(arg).decode('utf-8')
+    from urllib import quote
 else:
     from contrib.spia.internationalizator import _
+    from urllib.parse import quote
 
 LOCALE_DIR = os.path.join(sys.path[0], "locale")
 internationalizator.load_locale_chains(LOCALE_DIR)
+
 
 def add(repo_path, package_names, sources, recommends, suggests, arch):
     """
@@ -46,7 +49,6 @@ def add(repo_path, package_names, sources, recommends, suggests, arch):
     repos = get_repositories(sources)
     rep = SourceRepository(repos, arch=arch)
     print (_("Loading packages..."))
-    internationalizator.pepe = 'en'
     rep.load_packages()
     print (_("Finding dependencies..."))
     packages = {}
@@ -62,7 +64,36 @@ def add(repo_path, package_names, sources, recommends, suggests, arch):
     tinp.rebuild_repo_index()
     print ("----------------------------------------")
     print (_('Completed. You can use the repository adding next line to your "sources.list":'))
-    print ('    deb file:%s tinp main' % repo_path)
+    print ('    deb file:%s tinp main' % quote(repo_path, safe="%/:=&?~#+!$,;'@()*[]"))
+
+def add_section(repo_path, section_name, sources, recommends, suggests, arch):
+    """
+        add_section option handler
+    """
+    from parsers import get_repositories
+    from repository import SourceRepository, TinpRepository
+    from parsers import get_repositories
+    from utils import join_dicts
+    repos = get_repositories(sources)
+    rep = SourceRepository(repos, arch=arch)
+    print (_("Loading packages..."))
+    rep.load_packages()
+    print (_("Finding dependencies..."))
+    packages = {}
+    for package_name in rep.packages:
+        if rep.packages[package_name]['Section'] == section_name:
+            packages = join_dicts(packages, 
+                rep.get_package_tree(package_name, recommends=recommends, suggests=suggests))
+    tinp = TinpRepository(repo_path, arch=arch)
+    print (_("Adding new packages..."))
+    for p in packages:
+        tinp.add_package(packages[p])
+    print (_("Building package index..."))
+    tinp.rebuild_repo_index()
+    print ("----------------------------------------")
+    print (_('Completed. You can use the repository adding next line to your "sources.list":'))
+    print ('    deb file:%s tinp main' % quote(repo_path, safe="%/:=&?~#+!$,;'@()*[]"))
+
 
 def upgrade(repo_path, sources, arch):
     """
@@ -81,7 +112,6 @@ def upgrade(repo_path, sources, arch):
         tinp.add_package(rep.packages[p])
     print (_("Building package index..."))
     tinp.rebuild_repo_index()
-
 
 
 def remove(repo_path, package_names, arch):
@@ -109,6 +139,9 @@ def start(repo_path, options):
     if options.add:
         add(repo_path, options.add, options.sources, 
             options.add_recommends, options.add_suggests, options.arch)
+    if options.add_section:
+        add_section(repo_path, options.add_section, options.sources, 
+            options.add_recommends, options.add_suggests, options.arch)
     if options.remove:
         remove(repo_path, options.remove, options.arch)
     if options.upgrade:
@@ -118,7 +151,9 @@ lookup = {
     'usage: ': _('Usage: '),
     'optional arguments': _('Options'),
     'positional arguments': _('Arguments'),
-    'too few arguments':_('too few arguments')}
+    'too few arguments':_('too few arguments'),
+    'show this help message and exit':_('show this help message and exit')
+    }
 
 
 def gettext(s):
@@ -129,9 +164,11 @@ def main():
     # import optparse
 
     # usage = _('%(prog)s path/to/repo/ option "argument[s]"')
-    # # usage = '%prog path/to/repo/ option "argument[s]"'
+    # # usage = '%prog path/to/repo/ option "argument[s]"'    
+    prog = 'tinp-cli'
+    version = '%(prog)s 0.2.1'
     description = _('This program creates and manage a customized debian-based repository.')
-    # version = '%prog 0.1.0'
+    epilog = version+' - (C) 2014 Carlos Cesar Caballero Díaz'
     # parser = optparse.OptionParser(usage=usage, description=description,
     #   version=version)
     # parser.set_usage('Uso: pepe')
@@ -140,14 +177,23 @@ def main():
     import argparse
     argparse._ = gettext
 
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(
+      prog=prog,
+      formatter_class=argparse.RawDescriptionHelpFormatter,
+      description=description,
+      epilog=epilog)
 
     parser.add_argument('custom_repository', metavar=_('path'),
                    help=_('path to custom repository'))
 
+    parser.add_argument('--version', action='version', version=version, 
+      help=_('show program\'s version number and exit'))
     parser.add_argument('-a', '--add', action='store', default=False, dest='add',
       metavar=_('package[s]'), 
       help=_('adds packages and all their dependencies to the custom repository (ex: "apache2 scite")'))
+    parser.add_argument('-d', '--add-section', action='store', default=False, dest='add_section',
+      metavar=_('section[s]'), 
+      help=_('adds all packages from a section and all their dependencies to the custom repository (ex: "utils admin")'))
     parser.add_argument('-c', '--arch', action='store', default='binary-i386', 
       metavar=_('arch'), help=_('define architecture (default "binary-i386")'))
     parser.add_argument('-s', '--sources', action='store', default='/etc/apt/sources.list', 
@@ -165,11 +211,10 @@ def main():
       dest='define_locale', metavar=_('locale'), help=_('define output languaje based on locale'))
     
     args = parser.parse_args()
-
     if not args.custom_repository:
         parser.error(_('You need to specify the working path, run again with the --help option'))
     else:
-        if not args.add or not args.remove or not args.upgrade:
+        if not args.add and not args.add_section and not args.remove and not args.upgrade:
             parser.error(_('Arguments error, run again with the --help option'))
 
     start(args.custom_repository, args)
