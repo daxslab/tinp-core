@@ -58,9 +58,9 @@ class TinpRepository(Repository):
         """
         Repository.__init__(self, packages, arch)
         self.path = path
-        self.repository = 'deb file:%s tinp main' % self.path
+        self.repository = 'deb file:%s tinp main' % self.path.replace(' ','%20')
         self.repository = create_section(self.repository)
-        self.packages_index_path = to_url(self.repository[0], self.arch, 'Packages')
+        self.packages_index_path = to_url(self.repository[0], self.arch, 'Packages').replace('%20',' ')
         if self.packages_index_path.startswith('file:'):
             self.packages_index_path = self.packages_index_path.replace('file:', '', 1)
         self.load_packages()
