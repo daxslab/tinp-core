@@ -25,13 +25,12 @@ import sys
 import os
 
 import contrib.spia.internationalizator as internationalizator
-
+from contrib.spia.internationalizator import _
 if sys.version < '3':
-    _ = lambda arg: internationalizator._(arg).decode('utf-8')
     from urllib import quote
 else:
-    from contrib.spia.internationalizator import _
     from urllib.parse import quote
+
 
 LOCALE_DIR = os.path.join(sys.path[0], "locale")
 internationalizator.load_locale_chains(LOCALE_DIR)
