@@ -35,6 +35,7 @@ from datetime import datetime
 # from utils import format_number
 
 from shutil import copyfile
+from shutil import copy2
 
 
 #TODO: Add resume support: http://code.activestate.com/recipes/83208-resuming-download-of-a-file/
@@ -178,8 +179,13 @@ def download_file(url, filename, display=None, progress=textprogress):
     if not display:
         display = url.rsplit("/", 1)[1]
     #print "download_file: "+url+" file: "+filename
-    copyfile(url.replace('file:', ''), filename)
-    progress(display, 100, 100)
+    file_path = url.replace('file:', '')
+    file_path = file_path.replace('%20', ' ')
+    file_size = os.stat(file_path).st_size
+    # copyfile(file_path, filename)
+    print 'ak'
+    copy2(file_path, filename)
+    progress(display, file_size, file_size)
     
     return
 
