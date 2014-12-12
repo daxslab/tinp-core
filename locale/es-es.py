@@ -32,4 +32,8 @@ keys = {
 'path':'ruta',
 'path to custom repository':'ruta del repositorio personalizado',
 'too few arguments':'muy pocos argumentos',
+'adds all packages from a section and all their dependencies to the custom repository (ex: "utils admin")':'agraga todos los paquetes de una sección y todas sus dependencias (ej: "utils admin")',
+'section[s]':'sección[es]',
+'show this help message and exit':'muestra este mensaje de ayuda y termina el programa',
+'show program\'s version number and exit':'muestra la version de la aplicación',
 }
