@@ -45,8 +45,16 @@ def get_packages(repositories, arch='binary-i386', packages_index_filename='Pack
             if pkg['Package'] in packages:
                 if pkg['Version'] > packages[pkg['Package']]['Version']:
                     packages[pkg['Package']] = pkg
+                    # virtual packages (basic support)
+                    for provides in pkg.relations['provides']:
+                        for virtual in provides:
+                            packages[virtual['name']] = pkg
             else:
                 packages[pkg['Package']] = pkg
+                # virtual packages (basic support)
+                for provides in pkg.relations['provides']:
+                    for virtual in provides:
+                        packages[virtual['name']] = pkg
     return packages
 
 class InvalidRepository(Exception):
@@ -97,6 +105,20 @@ def get_repositories(sources_file):
     return repositories
 
 
+def parse_relation(relation):
+    """
+    parse a relation string (Depends, Recommends, Suggest or Provide)
+    :param relation: relation string
+    :return: list of package names in relations
+    """
+    relation_object = deb822.PkgRelation()
+    relations = []
+    for recommends_list in relation_object.parse_relations(relation):
+        for dep in recommends_list:
+            relations.append(dep['name'])
+    return relations
+
+
 # file = open('/home/cccaballero/Escritorio/Packages', 'wb')
 # for pack in deb822.Packages.iter_paragraphs(open("/media/cccaballero/Cesar2/repo/ru1404/mirror/ubuntu.uci.cu/ubuntu/dists/trusty/main/binary-i386/Packages.gz")):
 #     pack.dump(fd=file)
@@ -111,6 +133,9 @@ def get_repositories(sources_file):
 
 # for pack in deb822.Packages.iter_paragraphs(open("/media/cccaballero/Cesar2/repo/ru1404/mirror/ubuntu.uci.cu/ubuntu/dists/trusty/main/binary-i386/Packages.gz")):
 #     # print pack
+#     for provides in pack.relations['provides']:
+#         for virtual in provides:
+#             print virtual['name']
 #     for key in pack:
 #         print key+": "+pack[key]
 #     break
