@@ -183,7 +183,6 @@ def download_file(url, filename, display=None, progress=textprogress):
     file_path = file_path.replace('%20', ' ')
     file_size = os.stat(file_path).st_size
     # copyfile(file_path, filename)
-    print 'ak'
     copy2(file_path, filename)
     progress(display, file_size, file_size)
     
