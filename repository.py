@@ -49,7 +49,7 @@ class Repository:
 
 class TinpRepository(Repository):
 
-    def __init__(self, path, packages={}, arch='binary-i386'):
+    def __init__(self, path, packages={}, arch='binary-amd64'):
         """
         Creates a new tinP repository instance
         :param packages: Dictionary of package objects following a deb822 instance
@@ -71,7 +71,7 @@ class TinpRepository(Repository):
         load packages from package index
         """
         try:
-            self.packages = get_packages(self.repository, arch=self.arch, packages_index_filename='Packages')
+            self.packages = get_packages(self.repository, arch=self.arch)
         except:
             pass
 
@@ -87,6 +87,8 @@ class TinpRepository(Repository):
             path_directory, filename = os.path.split(package_path)
             os.removedirs(path_directory)
         except IOError:
+            pass
+        except OSError:
             pass
         del self.packages[package_name]
 

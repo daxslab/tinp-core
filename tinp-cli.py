@@ -91,7 +91,7 @@ def add_section(repo_path, section_name, sources, recommends, suggests, arch):
     tinp.rebuild_repo_index()
     print ("----------------------------------------")
     print (_('Completed. You can use the repository adding next line to your "sources.list":'))
-    print ('    deb file:%s tinp main' % quote(repo_path, safe="%/:=&?~#+!$,;'@()*[]"))
+    print ('    deb [trusted=yes] file:%s tinp main' % quote(repo_path, safe="%/:=&?~#+!$,;'@()*[]"))
 
 
 def upgrade(repo_path, sources, arch):
@@ -193,8 +193,8 @@ def main():
     parser.add_argument('-d', '--add-section', action='store', default=False, dest='add_section',
       metavar=_('section[s]'), 
       help=_('adds all packages from a section and all their dependencies to the custom repository (ex: "utils admin")'))
-    parser.add_argument('-c', '--arch', action='store', default='binary-i386', 
-      metavar=_('arch'), help=_('define architecture (default "binary-i386")'))
+    parser.add_argument('-c', '--arch', action='store', default='binary-amd64',
+      metavar=_('arch'), help=_('define architecture (default "binary-amd64")'))
     parser.add_argument('-s', '--sources', action='store', default='/etc/apt/sources.list', 
       metavar=_('sources_file'), 
       help=_('origin repository source file (/etc/apt/sources.list by default)'))

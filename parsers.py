@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
+import gzip
 
 __author__ = 'cccaballero'
 
@@ -40,7 +41,11 @@ def get_packages(repositories, arch='binary-i386', packages_index_filename='Pack
         tmp_file = tempfile.mkdtemp()
         download(package_sources_path, tmp_file+"/tmp000")
         # packages.append(deb822.Packages.iter_paragraphs(open(tmp_file+"/tmp000")))
-        for pkg in deb822.Packages.iter_paragraphs(open(tmp_file+"/tmp000")):
+        if packages_index_filename.split('.')[-1] == 'gz':
+            tmp_package_file = gzip.open(tmp_file + "/tmp000")
+        else:
+            tmp_package_file = open(tmp_file + "/tmp000")
+        for pkg in deb822.Packages.iter_paragraphs(tmp_package_file):
             pkg.base_url = section["surl"]
             if pkg['Package'] in packages:
                 if pkg['Version'] > packages[pkg['Package']]['Version']:
