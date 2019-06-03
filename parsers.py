@@ -23,7 +23,7 @@ import gzip
 
 __author__ = 'cccaballero'
 
-from contrib.debian import deb822
+from debian import deb822
 from contrib.unwrapt.utils import url_join, to_url
 from contrib.unwrapt.Download import download
 import tempfile
