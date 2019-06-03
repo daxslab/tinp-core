@@ -3,7 +3,7 @@
 #
 # tinp-cli.py
 #
-# Copyright 2014 Carlos Cesar Caballero Diaz <ccesar@linuxmail.org>
+# Copyright 2014 Carlos Cesar Caballero Diaz <ccesar@daxslab.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@ from __future__ import absolute_import, print_function
 import sys
 import os
 
-import contrib.spia.internationalizator as internationalizator
-from contrib.spia.internationalizator import _
+import spia.internationalizator as internationalizator
+from spia.internationalizator import _
 if sys.version < '3':
     from urllib import quote
 else:
